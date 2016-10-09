@@ -56,32 +56,26 @@ jQuery(document).ready(function($){
     });
     //detect click on the a single event - show new event content
     timelineComponents['eventsWrapper'].on('click', 'a', function(event){
-      var $this = $(this);
       event.preventDefault();
-      timelineComponents['timelineEvents'].removeClass('selected highlighted');
-      $this.addClass('selected')
-           .parent('li').nextAll('li:lt('+(config.panels-1)+')').children('a').addClass('highlighted');
-      updateOlderEvents($this);
-      updateFilling($this, timelineComponents['fillingLine'], timelineTotWidth);
-      updateVisibleContent($this, timelineComponents['eventsContent']);
+      showNewContent(timelineComponents, timelineTotWidth, $(this), 'next'); // FIXME nextOrPrev?
     });
 
     //on swipe, show next/prev event content
     timelineComponents['eventsContent'].on('swipeleft', function(){
       var mq = checkMQ();
-      ( mq == 'mobile' ) && showNewContent(timelineComponents, timelineTotWidth, 'next');
+      ( mq == 'mobile' ) && showAdjacentEvent(timelineComponents, timelineTotWidth, 'next');
     });
     timelineComponents['eventsContent'].on('swiperight', function(){
       var mq = checkMQ();
-      ( mq == 'mobile' ) && showNewContent(timelineComponents, timelineTotWidth, 'prev');
+      ( mq == 'mobile' ) && showAdjacentEvent(timelineComponents, timelineTotWidth, 'prev');
     });
 
     //keyboard navigation
     $(document).keyup(function(event){
-      if(event.which=='37' && elementInViewport(timeline.get(0)) ) {
-        showNewContent(timelineComponents, timelineTotWidth, 'prev');
-      } else if( event.which=='39' && elementInViewport(timeline.get(0))) {
-        showNewContent(timelineComponents, timelineTotWidth, 'next');
+      if (event.which == '37' && elementInViewport(timeline.get(0))) {
+        showAdjacentEvent(timelineComponents, timelineTotWidth, 'prev');
+      } else if (event.which == '39' && elementInViewport(timeline.get(0))) {
+        showAdjacentEvent(timelineComponents, timelineTotWidth, 'next');
       }
     });
   });
@@ -106,22 +100,23 @@ jQuery(document).ready(function($){
       : translateTimeline(timelineComponents, translateValue + wrapperWidth - config.eventsMinDistance);
   }
 
-  function showNewContent(timelineComponents, timelineTotWidth, string) {
+  function showAdjacentEvent(timelineComponents, timelineTotWidth, nextOrPrev) {
     //go from one event to the next/previous one
-    var visibleContent =  timelineComponents['eventsContent'].find('.selected'),
-      newContent = ( string == 'next' ) ? visibleContent.next() : visibleContent.prev();
-
-    if ( newContent.length > 0 ) { //if there's a next/prev event - show it
-      var selectedDate = timelineComponents['eventsWrapper'].find('.selected'),
-        newEvent = ( string == 'next' ) ? selectedDate.parent('li').next('li').children('a') : selectedDate.parent('li').prev('li').children('a');
-
-      updateFilling(newEvent, timelineComponents['fillingLine'], timelineTotWidth);
-      updateVisibleContent(newEvent, timelineComponents['eventsContent']);
-      newEvent.addClass('selected');
-      selectedDate.removeClass('selected');
-      updateOlderEvents(newEvent);
-      updateTimelinePosition(string, newEvent, timelineComponents);
+    var selectedDate = timelineComponents['eventsWrapper'].find('.selected'),
+        newEvent = selectedDate.parent('li')[nextOrPrev]('li').children('a');
+    if (newEvent.length) {
+      showNewContent(timelineComponents, timelineTotWidth, newEvent, nextOrPrev);
     }
+  }
+
+  function showNewContent(timelineComponents, timelineTotWidth, newEvent, nextOrPrev) {
+    updateFilling(newEvent, timelineComponents['fillingLine'], timelineTotWidth);
+    updateVisibleContent(newEvent, timelineComponents['eventsContent']);
+    timelineComponents['timelineEvents'].removeClass('selected highlighted');
+    newEvent.addClass('selected')
+            .parent('li').nextAll('li:lt('+(config.panels-1)+')').children('a').addClass('highlighted');
+    updateOlderEvents(newEvent);
+    updateTimelinePosition(nextOrPrev, newEvent, timelineComponents);
   }
 
   function updateTimelinePosition(string, event, timelineComponents) {
