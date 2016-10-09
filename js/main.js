@@ -33,6 +33,7 @@ jQuery(document).ready(function($){
     timelineComponents['timelineNavigation'] = timeline.find('.cd-timeline-navigation');
     timelineComponents['eventsWrapper'] = timelineComponents['timelineWrapper'].children('.events');
     timelineComponents['eventsContent'] = timeline.children('.events-content');
+    timelineComponents['panelSwitches'] = timeline.find('.panel-switch a');
 
     loadEventsList(timelineComponents['eventsWrapper']).then(function() {
       timelineComponents['fillingLine'] = timelineComponents['eventsWrapper'].children('.filling-line');
@@ -51,11 +52,17 @@ jQuery(document).ready(function($){
     });
 
     // panel switches
-    timeline.find('.panel-switch a').click(function(event) {
-      event.preventDefault();
-      config.panels = parseInt(this.getAttribute('data-panels'));
-      timelineComponents['timelineEvents'].first('.selected').click();
-    });
+    timelineComponents['panelSwitches']
+      .click(function(event) {
+        event.preventDefault();
+        var nPanels = parseInt(this.getAttribute('data-panels'));
+        if (config.panels == nPanels) return;
+        config.panels = nPanels;
+        timelineComponents['timelineEvents'].filter('.selected').first().click();
+        timelineComponents['panelSwitches'].removeClass('selected');
+        this.setAttribute('class', 'selected');
+      })
+      .filter('[data-panels="'+config.panels+'"]').addClass('selected');
 
     // next/prev buttons
     timelineComponents['timelineNavigation']
