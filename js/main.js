@@ -46,6 +46,15 @@ jQuery(document).ready(function($){
       timelineTotWidth = setTimelineWidth(timelineComponents, config.eventsMinDistance);
       //the timeline has been initialize - show it
       timeline.addClass('loaded');
+
+      timelineComponents['timelineEvents'].first().click();
+    });
+
+    // panel switches
+    timeline.find('.panel-switch a').click(function(event) {
+      event.preventDefault();
+      config.panels = parseInt(this.getAttribute('data-panels'));
+      timelineComponents['timelineEvents'].first('.selected').click();
     });
 
     // next/prev buttons
@@ -120,9 +129,11 @@ jQuery(document).ready(function($){
 
   function showNewContent(timelineComponents, timelineTotWidth, newEvent, nextOrPrev) {
     // handle clicking on an event that doesn't have enough events ahead of it
-    var lastEventLi = newEvent.parent('li').nextAll('li:lt('+(config.panels-1)+')').last();
-    if (!lastEventLi.length) lastEventLi = newEvent.parent('li');
-    newEvent = lastEventLi.prevAll('li:lt(' + (config.panels-1) + ')').last().children('a');
+    if (config.panels > 1) {
+      var lastEventLi = newEvent.parent('li').nextAll('li:lt('+(config.panels-1)+')').last();
+      if (!lastEventLi.length) lastEventLi = newEvent.parent('li');
+      newEvent = lastEventLi.prevAll('li:lt(' + (config.panels-1) + ')').last().children('a');
+    }
 
     if (!newEvent.length) return;
 
@@ -202,7 +213,11 @@ jQuery(document).ready(function($){
 
   function updateFilling(selectedEvent, filling, totWidth) {
     //change .filling-line length according to the selected event
-    if (config.panels < 2) return;
+    if (config.panels < 2) {
+      filling[0].style['width'] = 0;
+      return;
+    }
+
     var lastEvent = selectedEvent.parent('li').nextAll('li').eq(config.panels-2).children('a'),
         lastEventStyle = window.getComputedStyle(lastEvent.get(0), null),
         eventStyle = window.getComputedStyle(selectedEvent.get(0), null),
