@@ -110,7 +110,7 @@ Main Components
   transform-origin: left center;
   -webkit-transition: -webkit-transform 0.3s;
   -moz-transition: -moz-transform 0.3s;
-  transition: transform 0.3s;
+  transition: left 0.3s, transform 0.3s;
 }
 .cd-horizontal-timeline .events a {
   position: absolute;
@@ -148,20 +148,19 @@ Main Components
   -moz-transition: background-color 0.3s, border-color 0.3s;
   transition: background-color 0.3s, border-color 0.3s;
 }
-.no-touch .cd-horizontal-timeline .events a:hover::after {
+.no-touch .cd-horizontal-timeline .events a:hover::after,
+.cd-horizontal-timeline .events a.selected::after,
+.cd-horizontal-timeline .events a.highlighted::after {
   background-color: #7b9d6f;
   border-color: #7b9d6f;
 }
 .cd-horizontal-timeline .events a.selected {
   pointer-events: none;
 }
-.cd-horizontal-timeline .events a.selected::after {
-  background-color: #7b9d6f;
-  border-color: #7b9d6f;
-}
 .cd-horizontal-timeline .events a.older-event::after {
   border-color: #7b9d6f;
 }
+
 @media only screen and (min-width: 1100px) {
   .cd-horizontal-timeline {
     margin: 6em auto;

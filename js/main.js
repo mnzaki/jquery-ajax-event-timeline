@@ -38,12 +38,14 @@ jQuery(document).ready(function($){
     });
     //detect click on the a single event - show new event content
     timelineComponents['eventsWrapper'].on('click', 'a', function(event){
+      var $this = $(this);
       event.preventDefault();
-      timelineComponents['timelineEvents'].removeClass('selected');
-      $(this).addClass('selected');
-      updateOlderEvents($(this));
-      updateFilling($(this), timelineComponents['fillingLine'], timelineTotWidth);
-      updateVisibleContent($(this), timelineComponents['eventsContent']);
+      timelineComponents['timelineEvents'].removeClass('selected highlighted');
+      $this.addClass('selected')
+           .parent('li').nextAll('li:lt('+(config.panels-1)+')').children('a').addClass('highlighted');
+      updateOlderEvents($this);
+      updateFilling($this, timelineComponents['fillingLine'], timelineTotWidth);
+      updateVisibleContent($this, timelineComponents['eventsContent']);
     });
 
     //on swipe, show next/prev event content
@@ -119,12 +121,20 @@ jQuery(document).ready(function($){
 
   function updateFilling(selectedEvent, filling, totWidth) {
     //change .filling-line length according to the selected event
-    var eventStyle = window.getComputedStyle(selectedEvent.get(0), null),
-      eventLeft = eventStyle.getPropertyValue("left"),
-      eventWidth = eventStyle.getPropertyValue("width");
+    if (config.panels < 2) return;
+    var lastEvent = selectedEvent.parent('li').nextAll('li').eq(config.panels-2).children('a'),
+        lastEventStyle = window.getComputedStyle(lastEvent.get(0), null),
+        eventStyle = window.getComputedStyle(selectedEvent.get(0), null),
+        eventLeft = eventStyle.getPropertyValue("left"),
+        lastEventLeft = lastEventStyle.getPropertyValue("left"),
+        eventWidth = eventStyle.getPropertyValue("width"),
+        lastEventWidth = lastEventStyle.getPropertyValue("width"),
     eventLeft = Number(eventLeft.replace('px', '')) + Number(eventWidth.replace('px', ''))/2;
-    var scaleValue = eventLeft/totWidth;
-    setTransformValue(filling.get(0), 'scaleX', scaleValue);
+    lastEventLeft = Number(lastEventLeft.replace('px', '')) + Number(lastEventWidth.replace('px', ''))/2;
+    var scaleValue = (lastEventLeft-eventLeft)/totWidth;
+    filling = filling.get(0);
+    filling.style['left'] = eventLeft + 'px';
+    setTransformValue(filling, 'scaleX', scaleValue);
   }
 
   function setDatePosition(timelineComponents, min) {
