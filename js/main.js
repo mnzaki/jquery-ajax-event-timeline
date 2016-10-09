@@ -93,6 +93,12 @@ jQuery(document).ready(function($){
     });
   }
 
+  var eventContent = {};
+  function getEventContent(date) {
+    if (eventContent[date]) return eventContent[date];
+    return eventContent[date] = $.get(config.eventContentUrl, {date: date});
+  }
+
   function updateSlide(timelineComponents, timelineTotWidth, string) {
     //retrieve translateX value of timelineComponents['eventsWrapper']
     var translateValue = getTranslateValue(timelineComponents['eventsWrapper']),
@@ -119,12 +125,44 @@ jQuery(document).ready(function($){
     newEvent = lastEventLi.prevAll('li:lt(' + (config.panels-1) + ')').last().children('a');
 
     if (!newEvent.length) return;
+
+    var appendOrPrepend = nextOrPrev == 'next' ? 'append' : 'prepend',
+        oldContent = timelineComponents['eventsContent'].find('.selected'),
+        newContent = $(),
+        eventLis = newEvent.parent('li');
+
+    eventLis
+      .add(eventLis.nextAll('li:lt('+(config.panels-1)+')'))
+      .children('a').map(function(i, eventA) {
+        var date = eventA.getAttribute('data-date'),
+            newLi = $('<li></li>', {
+              "class": "loading",
+              "data-date": date,
+            });
+        getEventContent(date).then(function(data) {
+          newLi.html(data);
+        });
+        newContent = newContent.add(newLi);
+      });
+
+    oldContent.map(function(i, li) {
+      var date = li.getAttribute('data-date');
+      getEventContent(date).abort();
+    });
+    timelineComponents['eventsContent'].find('ol')[appendOrPrepend](newContent);
+    updateVisibleContent(oldContent, newContent, nextOrPrev);
     updateFilling(newEvent, timelineComponents['fillingLine'], timelineTotWidth);
-    updateVisibleContent(newEvent, timelineComponents['eventsContent']);
+
     timelineComponents['timelineEvents'].removeClass('selected highlighted');
-    newEvent.addClass('selected')
-            .parent('li').nextAll('li:lt('+(config.panels-1)+')').children('a').addClass('highlighted');
-    updateOlderEvents(newEvent);
+
+    newEvent
+      .addClass('selected')
+      .parent('li').nextAll('li:lt('+(config.panels-1)+')').children('a').addClass('highlighted');
+
+    newEvent
+      .parent('li').prevAll('li').children('a').addClass('older-event')
+      .end().end().nextAll('li').children('a').removeClass('older-event');
+
     updateTimelinePosition(nextOrPrev, newEvent, timelineComponents);
   }
 
@@ -204,36 +242,24 @@ jQuery(document).ready(function($){
     return totalWidth;
   }
 
-  function updateVisibleContent(event, eventsContent) {
-    var eventDate = event.data('date'),
-      nPanels = config.panels,
-      visibleContent = eventsContent.find('.selected'),
-      selectedContent = eventsContent.find('[data-date="'+ eventDate +'"]'),
-      selectedContentHeight = selectedContent.height();
-
-    if (selectedContent.index() > visibleContent.index()) {
-      var classEntering = 'selected enter-right',
-        classLeaving = 'leave-left';
+  function updateVisibleContent(oldContent, newContent, nextOrPrev) {
+    var classEntering, classLeaving;
+    if (nextOrPrev == 'next') {
+      classEntering = 'selected enter-right';
+      classLeaving = 'leave-left';
     } else {
-      var classEntering = 'selected enter-left',
-        classLeaving = 'leave-right';
+      classEntering = 'selected enter-left';
+      classLeaving = 'leave-right';
     }
 
-    visibleContent.attr('class', classLeaving).one('webkitAnimationEnd oanimationend msAnimationEnd animationend', function(){
-      visibleContent.removeClass('leave-right leave-left');
-      selectedContent.removeClass('enter-left enter-right');
+    oldContent.attr('class', classLeaving).one('webkitAnimationEnd oanimationend msAnimationEnd animationend', function(){
+      oldContent.remove();
+      newContent.removeClass('enter-left enter-right');
     });
 
-    selectedContent
-      .add(selectedContent.nextAll('li:lt('+(nPanels-1)+')'))
-      .attr('class', classEntering)
-      .css('width', (100/nPanels) + '%');
-
-    //eventsContent.css('height', selectedContentHeight+'px');
-  }
-
-  function updateOlderEvents(event) {
-    event.parent('li').prevAll('li').children('a').addClass('older-event').end().end().nextAll('li').children('a').removeClass('older-event');
+    newContent
+      .addClass(classEntering)
+      .css('width', (100/config.panels) + '%');
   }
 
   function getTranslateValue(timeline) {
