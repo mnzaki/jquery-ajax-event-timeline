@@ -20,6 +20,10 @@ jQuery(document).ready(function($){
     }
   })();
 
+  function px2num(val) {
+    return Number(val.replace('px', ''));
+  }
+
   $('.cd-horizontal-timeline').each(function(){
     var timeline = $(this),
         timelineTotWidth,
@@ -92,7 +96,7 @@ jQuery(document).ready(function($){
   function updateSlide(timelineComponents, timelineTotWidth, string) {
     //retrieve translateX value of timelineComponents['eventsWrapper']
     var translateValue = getTranslateValue(timelineComponents['eventsWrapper']),
-      wrapperWidth = Number(timelineComponents['timelineWrapper'].css('width').replace('px', ''));
+      wrapperWidth = px2num(timelineComponents['timelineWrapper'].css('width'));
     //translate the timeline to the left('next')/right('prev')
     (string == 'next')
       ? translateTimeline(timelineComponents, translateValue - wrapperWidth + config.eventsMinDistance, wrapperWidth - timelineTotWidth)
@@ -121,9 +125,9 @@ jQuery(document).ready(function($){
   function updateTimelinePosition(string, event, timelineComponents) {
     //translate timeline to the left/right according to the position of the selected event
     var eventStyle = window.getComputedStyle(event.get(0), null),
-      eventLeft = Number(eventStyle.getPropertyValue("left").replace('px', '')),
-      timelineWidth = Number(timelineComponents['timelineWrapper'].css('width').replace('px', '')),
-      timelineTotWidth = Number(timelineComponents['eventsWrapper'].css('width').replace('px', ''));
+      eventLeft = px2num(eventStyle.getPropertyValue("left")),
+      timelineWidth = px2num(timelineComponents['timelineWrapper'].css('width')),
+      timelineTotWidth = px2num(timelineComponents['eventsWrapper'].css('width'));
     var timelineTranslate = getTranslateValue(timelineComponents['eventsWrapper']);
 
         if( (string == 'next' && eventLeft > timelineWidth - timelineTranslate) || (string == 'prev' && eventLeft < - timelineTranslate) ) {
@@ -147,16 +151,14 @@ jQuery(document).ready(function($){
     var lastEvent = selectedEvent.parent('li').nextAll('li').eq(config.panels-2).children('a'),
         lastEventStyle = window.getComputedStyle(lastEvent.get(0), null),
         eventStyle = window.getComputedStyle(selectedEvent.get(0), null),
-        eventLeft = eventStyle.getPropertyValue("left"),
-        lastEventLeft = lastEventStyle.getPropertyValue("left"),
-        eventWidth = eventStyle.getPropertyValue("width"),
-        lastEventWidth = lastEventStyle.getPropertyValue("width"),
-    eventLeft = Number(eventLeft.replace('px', '')) + Number(eventWidth.replace('px', ''))/2;
-    lastEventLeft = Number(lastEventLeft.replace('px', '')) + Number(lastEventWidth.replace('px', ''))/2;
-    var scaleValue = (lastEventLeft-eventLeft)/totWidth;
+        eventWidth = px2num(eventStyle.getPropertyValue("width")),
+        lastEventWidth = px2num(lastEventStyle.getPropertyValue("width")),
+        eventLeft = px2num(eventStyle.getPropertyValue("left")) + eventWidth/2,
+        lastEventLeft = px2num(lastEventStyle.getPropertyValue("left")) + lastEventWidth/2,
     filling = filling.get(0);
     filling.style['left'] = eventLeft + 'px';
     filling.style['width'] = (lastEventLeft - eventLeft) + 'px';
+    //var scaleValue = (lastEventLeft-eventLeft)/totWidth;
     //setTransformValue(filling, 'scaleX', scaleValue);
   }
 
