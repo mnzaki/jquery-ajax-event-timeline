@@ -1,30 +1,48 @@
 jQuery(document).ready(function($){
   var config = {
     panels: 2,
-    eventsMinDistance: 60,
-    eventListUrl: 'http://sp.nx.sg/hs/dates.php',
+    eventsMinDistance: 120,
+    eventsListUrl: 'http://sp.nx.sg/hs/dates.php',
     eventContentUrl: 'http://sp.nx.sg/hs/panels.php'
   };
 
+  var formatDate = (function() {
+    var monthNames = [
+      "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul",
+      "Aug", "Sep", "Oct", "Nov", "Dec"
+    ];
+    return function (date) {
+      var day = date.getDate(),
+          month = monthNames[date.getMonth()],
+          time = date.toLocaleTimeString(),
+          year = date.getFullYear();
+      return day + " " + month + " " + year + " " + time;
+    }
+  })();
+
   $('.cd-horizontal-timeline').each(function(){
     var timeline = $(this),
-      timelineComponents = {};
-    //cache timeline components
+        timelineTotWidth,
+        timelineComponents = {};
+
     timelineComponents['timelineWrapper'] = timeline.find('.events-wrapper');
-    timelineComponents['eventsWrapper'] = timelineComponents['timelineWrapper'].children('.events');
-    timelineComponents['fillingLine'] = timelineComponents['eventsWrapper'].children('.filling-line');
-    timelineComponents['timelineEvents'] = timelineComponents['eventsWrapper'].find('a');
-    timelineComponents['timelineDates'] = parseDate(timelineComponents['timelineEvents']);
-    timelineComponents['eventsMinLapse'] = minLapse(timelineComponents['timelineDates']);
     timelineComponents['timelineNavigation'] = timeline.find('.cd-timeline-navigation');
+    timelineComponents['eventsWrapper'] = timelineComponents['timelineWrapper'].children('.events');
     timelineComponents['eventsContent'] = timeline.children('.events-content');
 
-    //assign a left postion to the single events along the timeline
-    setDatePosition(timelineComponents, config.eventsMinDistance);
-    //assign a width to the timeline
-    var timelineTotWidth = setTimelineWidth(timelineComponents, config.eventsMinDistance);
-    //the timeline has been initialize - show it
-    timeline.addClass('loaded');
+    loadEventsList(timelineComponents['eventsWrapper']).then(function() {
+      timelineComponents['fillingLine'] = timelineComponents['eventsWrapper'].children('.filling-line');
+      timelineComponents['timelineEvents'] = timelineComponents['eventsWrapper'].find('a');
+      timelineComponents['timelineDates'] = parseDate(timelineComponents['timelineEvents']);
+      timelineComponents['eventsMinLapse'] = minLapse(timelineComponents['timelineDates']);
+
+      //assign a left postion to the single events along the timeline
+      setDatePosition(timelineComponents, config.eventsMinDistance);
+      //assign a width to the timeline
+      timelineTotWidth = setTimelineWidth(timelineComponents, config.eventsMinDistance);
+      //the timeline has been initialize - show it
+      timeline.addClass('loaded');
+    });
 
     //detect click on the next arrow
     timelineComponents['timelineNavigation'].on('click', '.next', function(event){
@@ -67,6 +85,16 @@ jQuery(document).ready(function($){
       }
     });
   });
+
+  function loadEventsList(eventsWrapper) {
+    return $.getJSON(config.eventsListUrl).then(function (eventsList) {
+      var newEventsList = eventsList.map(function(date) {
+        var formattedDate = formatDate(new Date(date));
+        return '<li><a href="#0" data-date="'+date+'">' + formattedDate + '</a></li>';
+      }).join('');
+      eventsWrapper.find('ol').empty().append(newEventsList).find('li:first-child a').addClass('selected');
+    });
+  }
 
   function updateSlide(timelineComponents, timelineTotWidth, string) {
     //retrieve translateX value of timelineComponents['eventsWrapper']
@@ -134,14 +162,16 @@ jQuery(document).ready(function($){
     var scaleValue = (lastEventLeft-eventLeft)/totWidth;
     filling = filling.get(0);
     filling.style['left'] = eventLeft + 'px';
-    setTransformValue(filling, 'scaleX', scaleValue);
+    filling.style['width'] = (lastEventLeft - eventLeft) + 'px';
+    //setTransformValue(filling, 'scaleX', scaleValue);
   }
 
   function setDatePosition(timelineComponents, min) {
     for (i = 0; i < timelineComponents['timelineDates'].length; i++) {
         var distance = daydiff(timelineComponents['timelineDates'][0], timelineComponents['timelineDates'][i]),
           distanceNorm = Math.round(distance/timelineComponents['eventsMinLapse']) + 2;
-        timelineComponents['timelineEvents'].eq(i).css('left', distanceNorm*min+'px');
+        //timelineComponents['timelineEvents'].eq(i).css('left', distanceNorm*min+'px');
+        timelineComponents['timelineEvents'].eq(i).css('left', i*min+'px');
     }
   }
 
@@ -222,6 +252,8 @@ jQuery(document).ready(function($){
     var dateArrays = [];
     events.each(function(){
       var singleDate = $(this),
+        dateComp = singleDate.data('date');
+      /*
         dateComp = singleDate.data('date').split('T');
       if( dateComp.length > 1 ) { //both DD/MM/YEAR and time are provided
         var dayComp = dateComp[0].split('/'),
@@ -234,20 +266,21 @@ jQuery(document).ready(function($){
           timeComp = ["0", "0"];
       }
       var newDate = new Date(dayComp[2], dayComp[1]-1, dayComp[0], timeComp[0], timeComp[1]);
-      dateArrays.push(newDate);
+      */
+      dateArrays.push(new Date(dateComp));
     });
       return dateArrays;
   }
 
   function daydiff(first, second) {
-      return Math.round((second-first));
+      return Math.abs(Math.round((second-first)));
   }
 
   function minLapse(dates) {
     //determine the minimum distance among events
     var dateDistances = [];
     for (i = 1; i < dates.length; i++) {
-        var distance = daydiff(dates[i-1], dates[i]);
+        var distance = Math.abs(daydiff(dates[i-1], dates[i]));
         dateDistances.push(distance);
     }
     return Math.min.apply(null, dateDistances);
