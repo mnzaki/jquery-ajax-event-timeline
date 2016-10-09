@@ -48,18 +48,18 @@ jQuery(document).ready(function($){
       timeline.addClass('loaded');
     });
 
-    //detect click on the next arrow
-    timelineComponents['timelineNavigation'].on('click', '.next', function(event){
-      event.preventDefault();
-      updateSlide(timelineComponents, timelineTotWidth, 'next');
-    });
-    //detect click on the prev arrow
-    timelineComponents['timelineNavigation'].on('click', '.prev', function(event){
-      event.preventDefault();
-      updateSlide(timelineComponents, timelineTotWidth, 'prev');
-    });
-    //detect click on the a single event - show new event content
-    timelineComponents['eventsWrapper'].on('click', 'a', function(event){
+    // next/prev buttons
+    timelineComponents['timelineNavigation']
+      .on('click', '.next', function(event) {
+        event.preventDefault();
+        updateSlide(timelineComponents, timelineTotWidth, 'next');
+      })
+      .on('click', '.prev', function(event) {
+        event.preventDefault();
+        updateSlide(timelineComponents, timelineTotWidth, 'prev');
+      });
+
+    timelineComponents['eventsWrapper'].on('click', 'a', function(event) {
       event.preventDefault();
       showNewContent(timelineComponents, timelineTotWidth, $(this), 'next'); // FIXME nextOrPrev?
     });
@@ -74,7 +74,7 @@ jQuery(document).ready(function($){
       });
 
     //keyboard navigation
-    $(document).keyup(function(event){
+    $(document).keyup(function(event) {
       if (event.which == '37' && elementInViewport(timeline.get(0))) {
         goToAdjacentEvent(timelineComponents, timelineTotWidth, 'prev');
       } else if (event.which == '39' && elementInViewport(timeline.get(0))) {
