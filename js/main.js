@@ -1,76 +1,70 @@
 jQuery(document).ready(function($){
   var config = {
     panels: 2,
+    eventsMinDistance: 60,
     eventListUrl: 'http://sp.nx.sg/hs/dates.php',
     eventContentUrl: 'http://sp.nx.sg/hs/panels.php'
   };
 
-  var timelines = $('.cd-horizontal-timeline'),
-    eventsMinDistance = 60;
+  $('.cd-horizontal-timeline').each(function(){
+    var timeline = $(this),
+      timelineComponents = {};
+    //cache timeline components
+    timelineComponents['timelineWrapper'] = timeline.find('.events-wrapper');
+    timelineComponents['eventsWrapper'] = timelineComponents['timelineWrapper'].children('.events');
+    timelineComponents['fillingLine'] = timelineComponents['eventsWrapper'].children('.filling-line');
+    timelineComponents['timelineEvents'] = timelineComponents['eventsWrapper'].find('a');
+    timelineComponents['timelineDates'] = parseDate(timelineComponents['timelineEvents']);
+    timelineComponents['eventsMinLapse'] = minLapse(timelineComponents['timelineDates']);
+    timelineComponents['timelineNavigation'] = timeline.find('.cd-timeline-navigation');
+    timelineComponents['eventsContent'] = timeline.children('.events-content');
 
-  (timelines.length > 0) && initTimeline(timelines);
+    //assign a left postion to the single events along the timeline
+    setDatePosition(timelineComponents, config.eventsMinDistance);
+    //assign a width to the timeline
+    var timelineTotWidth = setTimelineWidth(timelineComponents, config.eventsMinDistance);
+    //the timeline has been initialize - show it
+    timeline.addClass('loaded');
 
-  function initTimeline(timelines) {
-    timelines.each(function(){
-      var timeline = $(this),
-        timelineComponents = {};
-      //cache timeline components
-      timelineComponents['timelineWrapper'] = timeline.find('.events-wrapper');
-      timelineComponents['eventsWrapper'] = timelineComponents['timelineWrapper'].children('.events');
-      timelineComponents['fillingLine'] = timelineComponents['eventsWrapper'].children('.filling-line');
-      timelineComponents['timelineEvents'] = timelineComponents['eventsWrapper'].find('a');
-      timelineComponents['timelineDates'] = parseDate(timelineComponents['timelineEvents']);
-      timelineComponents['eventsMinLapse'] = minLapse(timelineComponents['timelineDates']);
-      timelineComponents['timelineNavigation'] = timeline.find('.cd-timeline-navigation');
-      timelineComponents['eventsContent'] = timeline.children('.events-content');
-
-      //assign a left postion to the single events along the timeline
-      setDatePosition(timelineComponents, eventsMinDistance);
-      //assign a width to the timeline
-      var timelineTotWidth = setTimelineWidth(timelineComponents, eventsMinDistance);
-      //the timeline has been initialize - show it
-      timeline.addClass('loaded');
-
-      //detect click on the next arrow
-      timelineComponents['timelineNavigation'].on('click', '.next', function(event){
-        event.preventDefault();
-        updateSlide(timelineComponents, timelineTotWidth, 'next');
-      });
-      //detect click on the prev arrow
-      timelineComponents['timelineNavigation'].on('click', '.prev', function(event){
-        event.preventDefault();
-        updateSlide(timelineComponents, timelineTotWidth, 'prev');
-      });
-      //detect click on the a single event - show new event content
-      timelineComponents['eventsWrapper'].on('click', 'a', function(event){
-        event.preventDefault();
-        timelineComponents['timelineEvents'].removeClass('selected');
-        $(this).addClass('selected');
-        updateOlderEvents($(this));
-        updateFilling($(this), timelineComponents['fillingLine'], timelineTotWidth);
-        updateVisibleContent($(this), timelineComponents['eventsContent']);
-      });
-
-      //on swipe, show next/prev event content
-      timelineComponents['eventsContent'].on('swipeleft', function(){
-        var mq = checkMQ();
-        ( mq == 'mobile' ) && showNewContent(timelineComponents, timelineTotWidth, 'next');
-      });
-      timelineComponents['eventsContent'].on('swiperight', function(){
-        var mq = checkMQ();
-        ( mq == 'mobile' ) && showNewContent(timelineComponents, timelineTotWidth, 'prev');
-      });
-
-      //keyboard navigation
-      $(document).keyup(function(event){
-        if(event.which=='37' && elementInViewport(timeline.get(0)) ) {
-          showNewContent(timelineComponents, timelineTotWidth, 'prev');
-        } else if( event.which=='39' && elementInViewport(timeline.get(0))) {
-          showNewContent(timelineComponents, timelineTotWidth, 'next');
-        }
-      });
+    //detect click on the next arrow
+    timelineComponents['timelineNavigation'].on('click', '.next', function(event){
+      event.preventDefault();
+      updateSlide(timelineComponents, timelineTotWidth, 'next');
     });
-  }
+    //detect click on the prev arrow
+    timelineComponents['timelineNavigation'].on('click', '.prev', function(event){
+      event.preventDefault();
+      updateSlide(timelineComponents, timelineTotWidth, 'prev');
+    });
+    //detect click on the a single event - show new event content
+    timelineComponents['eventsWrapper'].on('click', 'a', function(event){
+      event.preventDefault();
+      timelineComponents['timelineEvents'].removeClass('selected');
+      $(this).addClass('selected');
+      updateOlderEvents($(this));
+      updateFilling($(this), timelineComponents['fillingLine'], timelineTotWidth);
+      updateVisibleContent($(this), timelineComponents['eventsContent']);
+    });
+
+    //on swipe, show next/prev event content
+    timelineComponents['eventsContent'].on('swipeleft', function(){
+      var mq = checkMQ();
+      ( mq == 'mobile' ) && showNewContent(timelineComponents, timelineTotWidth, 'next');
+    });
+    timelineComponents['eventsContent'].on('swiperight', function(){
+      var mq = checkMQ();
+      ( mq == 'mobile' ) && showNewContent(timelineComponents, timelineTotWidth, 'prev');
+    });
+
+    //keyboard navigation
+    $(document).keyup(function(event){
+      if(event.which=='37' && elementInViewport(timeline.get(0)) ) {
+        showNewContent(timelineComponents, timelineTotWidth, 'prev');
+      } else if( event.which=='39' && elementInViewport(timeline.get(0))) {
+        showNewContent(timelineComponents, timelineTotWidth, 'next');
+      }
+    });
+  });
 
   function updateSlide(timelineComponents, timelineTotWidth, string) {
     //retrieve translateX value of timelineComponents['eventsWrapper']
@@ -78,8 +72,8 @@ jQuery(document).ready(function($){
       wrapperWidth = Number(timelineComponents['timelineWrapper'].css('width').replace('px', ''));
     //translate the timeline to the left('next')/right('prev')
     (string == 'next')
-      ? translateTimeline(timelineComponents, translateValue - wrapperWidth + eventsMinDistance, wrapperWidth - timelineTotWidth)
-      : translateTimeline(timelineComponents, translateValue + wrapperWidth - eventsMinDistance);
+      ? translateTimeline(timelineComponents, translateValue - wrapperWidth + config.eventsMinDistance, wrapperWidth - timelineTotWidth)
+      : translateTimeline(timelineComponents, translateValue + wrapperWidth - config.eventsMinDistance);
   }
 
   function showNewContent(timelineComponents, timelineTotWidth, string) {
@@ -161,10 +155,10 @@ jQuery(document).ready(function($){
       selectedContentHeight = selectedContent.height();
 
     if (selectedContent.index() > visibleContent.index()) {
-      var classEnetering = 'selected enter-right',
+      var classEntering = 'selected enter-right',
         classLeaving = 'leave-left';
     } else {
-      var classEnetering = 'selected enter-left',
+      var classEntering = 'selected enter-left',
         classLeaving = 'leave-right';
     }
 
@@ -175,7 +169,7 @@ jQuery(document).ready(function($){
 
     selectedContent
       .add(selectedContent.nextAll('li:lt('+(nPanels-1)+')'))
-      .attr('class', classEnetering)
+      .attr('class', classEntering)
       .css('width', (100/nPanels) + '%');
 
     //eventsContent.css('height', selectedContentHeight+'px');
