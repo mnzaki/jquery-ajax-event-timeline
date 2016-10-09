@@ -271,6 +271,7 @@ Main Components
   position: relative;
   z-index: 2;
   opacity: 1;
+  float: left;
   -webkit-transform: translateX(0);
   -moz-transform: translateX(0);
   -ms-transform: translateX(0);

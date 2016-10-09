@@ -1,4 +1,10 @@
 jQuery(document).ready(function($){
+  var config = {
+    panels: 2,
+    eventListUrl: 'http://sp.nx.sg/hs/dates.php',
+    eventContentUrl: 'http://sp.nx.sg/hs/panels.php'
+  };
+
   var timelines = $('.cd-horizontal-timeline'),
     eventsMinDistance = 60;
 
@@ -149,6 +155,7 @@ jQuery(document).ready(function($){
 
   function updateVisibleContent(event, eventsContent) {
     var eventDate = event.data('date'),
+      nPanels = config.panels,
       visibleContent = eventsContent.find('.selected'),
       selectedContent = eventsContent.find('[data-date="'+ eventDate +'"]'),
       selectedContentHeight = selectedContent.height();
@@ -161,12 +168,17 @@ jQuery(document).ready(function($){
         classLeaving = 'leave-right';
     }
 
-    selectedContent.attr('class', classEnetering);
     visibleContent.attr('class', classLeaving).one('webkitAnimationEnd oanimationend msAnimationEnd animationend', function(){
       visibleContent.removeClass('leave-right leave-left');
       selectedContent.removeClass('enter-left enter-right');
     });
-    eventsContent.css('height', selectedContentHeight+'px');
+
+    selectedContent
+      .add(selectedContent.nextAll('li:lt('+(nPanels-1)+')'))
+      .attr('class', classEnetering)
+      .css('width', (100/nPanels) + '%');
+
+    //eventsContent.css('height', selectedContentHeight+'px');
   }
 
   function updateOlderEvents(event) {
