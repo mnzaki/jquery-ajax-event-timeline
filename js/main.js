@@ -92,7 +92,7 @@ jQuery(document).ready(function($){
         var formattedDate = formatDate(new Date(date));
         return '<li><a href="#0" data-date="'+date+'">' + formattedDate + '</a></li>';
       }).join('');
-      eventsWrapper.find('ol').empty().append(newEventsList).find('li:first-child a').addClass('selected');
+      eventsWrapper.find('ol').empty().append(newEventsList);
     });
   }
 
@@ -176,13 +176,17 @@ jQuery(document).ready(function($){
   }
 
   function setTimelineWidth(timelineComponents, width) {
-    var timeSpan = daydiff(timelineComponents['timelineDates'][0], timelineComponents['timelineDates'][timelineComponents['timelineDates'].length-1]),
-      timeSpanNorm = timeSpan/timelineComponents['eventsMinLapse'],
-      timeSpanNorm = Math.round(timeSpanNorm) + 4,
-      totalWidth = timeSpanNorm*width;
+    var timelineDates = timelineComponents['timelineDates'],
+        timeSpan = daydiff(timelineDates[0], timelineDates[timelineDates.length-1]),
+        timeSpanNorm = timeSpan/timelineComponents['eventsMinLapse'],
+        selectedEvent = timelineComponents['eventsWrapper'].find('a.selected');
+        timeSpanNorm = Math.round(timeSpanNorm) + 4,
+        totalWidth = timeSpanNorm*width;
     timelineComponents['eventsWrapper'].css('width', totalWidth+'px');
-    updateFilling(timelineComponents['eventsWrapper'].find('a.selected'), timelineComponents['fillingLine'], totalWidth);
-    updateTimelinePosition('next', timelineComponents['eventsWrapper'].find('a.selected'), timelineComponents);
+    if (selectedEvent.length) {
+      updateFilling(selectedEvent, timelineComponents['fillingLine'], totalWidth);
+      updateTimelinePosition('next', selectedEvent, timelineComponents);
+    }
 
     return totalWidth;
   }

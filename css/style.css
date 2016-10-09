@@ -96,7 +96,7 @@ Main Components
   left: 0;
   top: 0;
   height: 100%;
-  width: 100%;
+  width: 0;
   background-color: #7b9d6f;
   /*
   -webkit-transform: scaleX(0);
