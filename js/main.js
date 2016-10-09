@@ -113,6 +113,12 @@ jQuery(document).ready(function($){
   }
 
   function showNewContent(timelineComponents, timelineTotWidth, newEvent, nextOrPrev) {
+    // handle clicking on an event that doesn't have enough events ahead of it
+    var lastEventLi = newEvent.parent('li').nextAll('li:lt('+(config.panels-1)+')').last();
+    if (!lastEventLi.length) lastEventLi = newEvent.parent('li');
+    newEvent = lastEventLi.prevAll('li:lt(' + (config.panels-1) + ')').last().children('a');
+
+    if (!newEvent.length) return;
     updateFilling(newEvent, timelineComponents['fillingLine'], timelineTotWidth);
     updateVisibleContent(newEvent, timelineComponents['eventsContent']);
     timelineComponents['timelineEvents'].removeClass('selected highlighted');
@@ -124,13 +130,24 @@ jQuery(document).ready(function($){
 
   function updateTimelinePosition(string, event, timelineComponents) {
     //translate timeline to the left/right according to the position of the selected event
-    var eventStyle = window.getComputedStyle(event.get(0), null),
-      eventLeft = px2num(eventStyle.getPropertyValue("left")),
-      timelineWidth = px2num(timelineComponents['timelineWrapper'].css('width')),
-      timelineTotWidth = px2num(timelineComponents['eventsWrapper'].css('width'));
-    var timelineTranslate = getTranslateValue(timelineComponents['eventsWrapper']);
+    if (string == 'next') {
+      // find the event that's just ahead of the last in the chain
+      event = event.parent('li').nextAll('li:lt('+config.panels+')').last().children('a');
+    } else {
+      // or the event that's just behind the first one
+      event = event.parent('li').prev('li').children('a');
+    }
+    if (!event.length) return;
 
-        if( (string == 'next' && eventLeft > timelineWidth - timelineTranslate) || (string == 'prev' && eventLeft < - timelineTranslate) ) {
+    var eventStyle = window.getComputedStyle(event.get(0), null),
+        eventWidth = px2num(eventStyle.getPropertyValue("width")),
+        eventLeft = px2num(eventStyle.getPropertyValue("left")) + eventWidth/2,
+        timelineWidth = px2num(timelineComponents['timelineWrapper'].css('width')),
+        timelineTotWidth = px2num(timelineComponents['eventsWrapper'].css('width')),
+        timelineTranslate = getTranslateValue(timelineComponents['eventsWrapper']);
+
+        if( (string == 'next' && eventLeft > timelineWidth - timelineTranslate) ||
+            (string == 'prev' && eventLeft < - timelineTranslate) ) {
           translateTimeline(timelineComponents, - eventLeft + timelineWidth/2, timelineWidth - timelineTotWidth);
         }
   }
