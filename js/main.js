@@ -61,21 +61,20 @@ jQuery(document).ready(function($){
     });
 
     //on swipe, show next/prev event content
-    timelineComponents['eventsContent'].on('swipeleft', function(){
-      var mq = checkMQ();
-      ( mq == 'mobile' ) && showAdjacentEvent(timelineComponents, timelineTotWidth, 'next');
-    });
-    timelineComponents['eventsContent'].on('swiperight', function(){
-      var mq = checkMQ();
-      ( mq == 'mobile' ) && showAdjacentEvent(timelineComponents, timelineTotWidth, 'prev');
-    });
+    timelineComponents['eventsContent']
+      .on('swipeleft', function() {
+        goToAdjacentEvent(timelineComponents, timelineTotWidth, 'next');
+      })
+      .on('swiperight', function() {
+        goToAdjacentEvent(timelineComponents, timelineTotWidth, 'prev');
+      });
 
     //keyboard navigation
     $(document).keyup(function(event){
       if (event.which == '37' && elementInViewport(timeline.get(0))) {
-        showAdjacentEvent(timelineComponents, timelineTotWidth, 'prev');
+        goToAdjacentEvent(timelineComponents, timelineTotWidth, 'prev');
       } else if (event.which == '39' && elementInViewport(timeline.get(0))) {
-        showAdjacentEvent(timelineComponents, timelineTotWidth, 'next');
+        goToAdjacentEvent(timelineComponents, timelineTotWidth, 'next');
       }
     });
   });
@@ -100,7 +99,7 @@ jQuery(document).ready(function($){
       : translateTimeline(timelineComponents, translateValue + wrapperWidth - config.eventsMinDistance);
   }
 
-  function showAdjacentEvent(timelineComponents, timelineTotWidth, nextOrPrev) {
+  function goToAdjacentEvent(timelineComponents, timelineTotWidth, nextOrPrev) {
     //go from one event to the next/previous one
     var selectedDate = timelineComponents['eventsWrapper'].find('.selected'),
         newEvent = selectedDate.parent('li')[nextOrPrev]('li').children('a');
@@ -307,10 +306,5 @@ jQuery(document).ready(function($){
         (top + height) > window.pageYOffset &&
         (left + width) > window.pageXOffset
     );
-  }
-
-  function checkMQ() {
-    //check if mobile or desktop device
-    return window.getComputedStyle(document.querySelector('.cd-horizontal-timeline'), '::before').getPropertyValue('content').replace(/'/g, "").replace(/"/g, "");
   }
 });
