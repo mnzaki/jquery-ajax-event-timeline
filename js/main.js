@@ -84,14 +84,21 @@ jQuery(document).ready(function($){
         var nPanels = parseInt(this.getAttribute('data-panels'));
         if (config.panels == nPanels) return;
 
-        var nextOrPrev = nPanels > config.panels ? 'next' : 'prev';
+        var $this = $(this),
+            curEvent = timelineComponents['timelineEvents'].filter('.selected').first(),
+            nextOrPrev = nPanels > config.panels ? 'next' : 'prev';
         config.panels = nPanels;
-        renderContentChange(
-          timelineComponents, timelineTotWidth,
-          timelineComponents['timelineEvents'].filter('.selected').first(),
-          nextOrPrev);
-        timelineComponents['panelSwitches'].removeClass('selected');
-        $(this).addClass('selected');
+
+        showNewContent(timelineComponents, timelineTotWidth, curEvent);
+        newCurEvent = timelineComponents['timelineEvents'].filter('.selected').first();
+        if (newCurEvent[0] == curEvent[0]) {
+            renderContentChange(
+            timelineComponents, timelineTotWidth,
+            curEvent,
+            nextOrPrev);
+          timelineComponents['panelSwitches'].removeClass('selected');
+          $this.addClass('selected');
+        }
       })
       .filter('[data-panels="'+config.panels+'"]').addClass('selected');
 
