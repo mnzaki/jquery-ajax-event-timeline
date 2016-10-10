@@ -28,9 +28,11 @@ jQuery(document).ready(function($){
     return $.getJSON(config.eventsListUrl).then(function (eventsList) {
       var newEventsList = eventsList.map(function(date) {
         var formattedDate = formatDate(new Date(date));
-        return '<li><a href="#0" data-date="'+date+'">' + formattedDate + '</a></li>';
+        return '<li><a href="#0" data-date="'+date+'">' + formattedDate +
+               '<time datetime="'+date+'"></time></a></li>';
       }).join('');
       eventsWrapper.find('ol').empty().append(newEventsList);
+      eventsWrapper.find('time').timeago();
     });
   }
 

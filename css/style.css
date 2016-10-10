@@ -118,13 +118,31 @@ Main Components
   font-size: 1.3rem;
   padding-bottom: 15px;
   color: #383838;
+  opacity: 0.6;
+  line-height: 125%;
   /* fix bug on Safari - text flickering while timeline translates */
   -webkit-transform: translateZ(0);
   -moz-transform: translateZ(0);
   -ms-transform: translateZ(0);
   -o-transform: translateZ(0);
   transform: translateZ(0);
+  -webkit-transition: opacity 0.3s;
+  -moz-transition: opacity 0.3s;
+  transition: opacity 0.3s;
 }
+
+.cd-horizontal-timeline .events a.selected,
+.cd-horizontal-timeline .events a:hover,
+.cd-horizontal-timeline .events a.highlighted {
+  opacity: 1;
+}
+
+.cd-horizontal-timeline .events a time {
+  position: absolute;
+  width: 100%; top: 125%;
+  left: 0;
+}
+
 .cd-horizontal-timeline .events a::after {
   /* this is used to create the event spot */
   content: '';
