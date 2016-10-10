@@ -173,9 +173,6 @@ Main Components
 .cd-horizontal-timeline .events a.selected {
   pointer-events: none;
 }
-.cd-horizontal-timeline .events a.older-event::after {
-  border-color: #7b9d6f;
-}
 
 @media only screen and (min-width: 1100px) {
   .cd-horizontal-timeline {

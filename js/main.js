@@ -203,10 +203,6 @@ jQuery(document).ready(function($){
       .addClass('selected')
       .parent('li').nextAll('li:lt('+(config.panels-1)+')').children('a').addClass('highlighted');
 
-    newEvent
-      .parent('li').prevAll('li').children('a').addClass('older-event')
-      .end().end().nextAll('li').children('a').removeClass('older-event');
-
     updateTimelinePosition(nextOrPrev, newEvent, timelineComponents);
   }
 
