@@ -95,16 +95,25 @@ jQuery(document).ready(function($){
       })
       .filter('[data-panels="'+config.panels+'"]').addClass('selected');
 
-    // next/prev buttons
+    // next/prev navigation buttons
     timelineComponents['timelineNavigation']
-      .on('click', '.next', function(event) {
+      .on('click', '.next.scroll', function(event) {
         event.preventDefault();
         updateSlide(timelineComponents, timelineTotWidth, 'next');
       })
-      .on('click', '.prev', function(event) {
+      .on('click', '.prev.scroll', function(event) {
         event.preventDefault();
         updateSlide(timelineComponents, timelineTotWidth, 'prev');
+      })
+      .on('click', '.next.item', function(event) {
+        event.preventDefault();
+        goToAdjacentEvent(timelineComponents, timelineTotWidth, 'next');
+      })
+      .on('click', '.prev.item', function(event) {
+        event.preventDefault();
+        goToAdjacentEvent(timelineComponents, timelineTotWidth, 'prev');
       });
+
 
     timelineComponents['eventsWrapper'].on('click', 'a', function(event) {
       event.preventDefault();
@@ -147,6 +156,7 @@ jQuery(document).ready(function($){
     if (newEvent.length) {
       showNewContent(timelineComponents, timelineTotWidth, newEvent, nextOrPrev);
     }
+    updateTimelinePosition(nextOrPrev, newEvent, timelineComponents);
   }
 
   function showNewContent(timelineComponents, timelineTotWidth, newEvent, nextOrPrev) {
@@ -204,6 +214,16 @@ jQuery(document).ready(function($){
       .parent('li').nextAll('li:lt('+(config.panels-1)+')').children('a').addClass('highlighted');
 
     updateTimelinePosition(nextOrPrev, newEvent, timelineComponents);
+
+    var children = timelineComponents['timelineEvents'],
+        alpha = children[0],
+        zeta  = children[children.length-1];
+    var addRemove = function(ev, o) {
+      return (ev && ev[0]) == o ? 'addClass' : 'removeClass';
+    };
+    timelineComponents['timelineNavigation'].find('.prev.item')[addRemove(newEvent, alpha)]('inactive');
+    timelineComponents['timelineNavigation'].find('.next.item')[addRemove(newEvent, zeta)]('inactive');
+
   }
 
   function updateTimelinePosition(string, event, timelineComponents) {
@@ -236,8 +256,9 @@ jQuery(document).ready(function($){
     value = ( !(typeof totWidth === 'undefined') &&  value < totWidth ) ? totWidth : value; //do not translate more than timeline width
     setTransformValue(eventsWrapper, 'translateX', value+'px');
     //update navigation arrows visibility
-    (value == 0 ) ? timelineComponents['timelineNavigation'].find('.prev').addClass('inactive') : timelineComponents['timelineNavigation'].find('.prev').removeClass('inactive');
-    (value == totWidth ) ? timelineComponents['timelineNavigation'].find('.next').addClass('inactive') : timelineComponents['timelineNavigation'].find('.next').removeClass('inactive');
+    var addRemove = {true: 'addClass', false: 'removeClass'};
+    timelineComponents['timelineNavigation'].find('.prev.scroll')[addRemove[value==0]]('inactive');
+    timelineComponents['timelineNavigation'].find('.next.scroll')[addRemove[value==totWidth]]('inactive');
   }
 
   function updateFilling(selectedEvent, filling, totWidth) {

@@ -49,7 +49,7 @@ Main Components
 .cd-horizontal-timeline .events-wrapper {
   position: relative;
   height: 100%;
-  margin: 0 40px;
+  margin: 0 70px;
   overflow: hidden;
 }
 .cd-horizontal-timeline .events-wrapper::after, .cd-horizontal-timeline .events-wrapper::before {
@@ -204,6 +204,11 @@ Main Components
   -moz-transition: border-color 0.3s;
   transition: border-color 0.3s;
 }
+
+.cd-timeline-navigation a.scroll {
+  border: 0;
+}
+
 .cd-timeline-navigation a::after {
   /* arrow icon */
   content: '';
@@ -221,6 +226,11 @@ Main Components
   transform: translateX(-50%) translateY(-50%);
   background: url(../img/cd-arrow.svg) no-repeat 0 0;
 }
+
+.cd-timeline-navigation a.scroll::after {
+  background-position-x: -16px;
+}
+
 .cd-timeline-navigation a.prev {
   left: 0;
   -webkit-transform: translateY(-50%) rotate(180deg);
@@ -228,6 +238,12 @@ Main Components
   -ms-transform: translateY(-50%) rotate(180deg);
   -o-transform: translateY(-50%) rotate(180deg);
   transform: translateY(-50%) rotate(180deg);
+}
+.cd-timeline-navigation a.prev.item {
+  left: 34px;
+}
+.cd-timeline-navigation a.next.item {
+  right: 34px;
 }
 .cd-timeline-navigation a.next {
   right: 0;
@@ -239,7 +255,7 @@ Main Components
   cursor: not-allowed;
 }
 .cd-timeline-navigation a.inactive::after {
-  background-position: 0 -16px;
+  background-position-y: -16px;
 }
 .no-touch .cd-timeline-navigation a.inactive:hover {
   border-color: #dfdfdf;
