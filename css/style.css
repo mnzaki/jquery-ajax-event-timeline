@@ -174,12 +174,6 @@ Main Components
   pointer-events: none;
 }
 
-@media only screen and (min-width: 1100px) {
-  .cd-horizontal-timeline {
-    margin: 6em auto;
-  }
-}
-
 .cd-timeline-navigation a {
   /* these are the left/right arrows to navigate the timeline */
   position: absolute;
