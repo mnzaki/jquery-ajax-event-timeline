@@ -261,6 +261,61 @@ Main Components
   border-color: #dfdfdf;
 }
 
+.panel-switch {
+  display: block;
+  width: 100px;
+  padding: 5px;
+  text-align: center;
+  border: 1px solid #dfdfdf;
+  margin: auto;
+  margin-bottom: 20px;
+}
+
+.menu-burger {
+  position: relative;
+  padding-left: 1.25em;
+  width: 20px;
+  height:20px;
+  float: left;
+}
+.menu-burger:before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.25em;
+  width: 1em;
+  height: 0.15em;
+  background: black;
+  box-shadow:
+    0 0.25em 0 0 black,
+    0 0.5em 0 0 black,
+    0 0.75em 0 0 black,
+    0 1em 0 0 black;
+}
+.panel-switch a {
+  position: relative;
+  display: inline-block;
+  width: 30px;
+  height: 30px;
+  font-size: 20px;
+  opacity: 0.3;
+  -webkit-transition: opacity 0.3s;
+  -moz-transition: opacity 0.3s;
+  transition: opacity 0.3s;
+}
+.panel-switch a.selected {
+  opacity: 1;
+}
+
+.panel-switch a.one .menu-burger:before {
+  width: 1.3em;
+}
+.panel-switch a.two {
+  width: 40px;
+  font-size: 16px;
+  padding-top: 4px;
+}
+
 .cd-horizontal-timeline .events-content {
   position: relative;
   width: 100%;

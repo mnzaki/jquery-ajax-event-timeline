@@ -91,7 +91,7 @@ jQuery(document).ready(function($){
           timelineComponents['timelineEvents'].filter('.selected').first(),
           nextOrPrev);
         timelineComponents['panelSwitches'].removeClass('selected');
-        this.setAttribute('class', 'selected');
+        $(this).addClass('selected');
       })
       .filter('[data-panels="'+config.panels+'"]').addClass('selected');
 
