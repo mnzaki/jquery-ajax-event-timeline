@@ -41,7 +41,11 @@ jQuery(document).ready(function($){
 
   function getEventContent(date) {
     if (eventContent[date]) return eventContent[date];
-    return eventContent[date] = $.get(config.eventContentUrl, {date: date});
+    return eventContent[date] = $.ajax({
+      url: config.eventContentUrl,
+      data: {date: date},
+      dataType: 'html'
+    });
   }
 
   function abortEventContentRequest(date) {
@@ -204,6 +208,14 @@ jQuery(document).ready(function($){
         getEventContent(date).then(function(data) {
           newLi.html(data);
           newLi.removeClass('loading');
+
+          setTimeout(function() {
+              var height = px2num(window.getComputedStyle(newLi[0], null).getPropertyValue('height'));
+            timelineComponents['eventsContent'].find('selected').map(function(i, content) {
+              var thisHeight = px2num(window.getComputedStyle(content, null).getPropertyValue('height'));
+              if (height > thisHeight) content.style.height = height;
+            });
+          });
         });
         newContent = newContent.add(newLi);
       });
@@ -338,15 +350,6 @@ jQuery(document).ready(function($){
         newContent.removeClass('enter-left enter-right');
       })
       .first().addClass('first');
-
-    setTimeout(function() {
-      newContent.map(function(i, content) {
-        var height = px2num(window.getComputedStyle(content, null).getPropertyValue('height'));
-        if (height > contentHeight) contentHeight = height;
-      });
-
-      newContent.css('height', contentHeight + 'px');
-    });
   }
 
   function getTranslateValue(timeline) {
