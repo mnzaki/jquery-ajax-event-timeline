@@ -275,7 +275,8 @@ jQuery(document).ready(function($){
   }
 
   function updateVisibleContent(oldContent, newContent, nextOrPrev) {
-    var classEntering, classLeaving;
+    var classEntering, classLeaving, contentWidth = 100/config.panels;
+
     if (nextOrPrev == 'next') {
       classEntering = 'selected enter-right';
       classLeaving = 'leave-left';
@@ -287,11 +288,13 @@ jQuery(document).ready(function($){
     oldContent.attr('class', classLeaving).one('webkitAnimationEnd oanimationend msAnimationEnd animationend', function(){
       oldContent.remove();
       newContent.removeClass('enter-left enter-right');
+    }).map(function(i, content) {
+      content.style['margin-left'] = (i*contentWidth)+'%';
     });
 
     newContent
       .addClass(classEntering)
-      .css('width', (100/config.panels) + '%');
+      .css('width', contentWidth + '%');
   }
 
   function getTranslateValue(timeline) {
