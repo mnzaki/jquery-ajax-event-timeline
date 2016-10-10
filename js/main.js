@@ -285,7 +285,9 @@ jQuery(document).ready(function($){
   }
 
   function updateVisibleContent(oldContent, newContent, nextOrPrev) {
-    var classEntering, classLeaving, contentWidth = 100/config.panels;
+    var classEntering, classLeaving,
+        contentWidth = 100/config.panels,
+        contentHeight = 0;
 
     if (nextOrPrev == 'next') {
       classEntering = 'selected enter-right';
@@ -306,7 +308,17 @@ jQuery(document).ready(function($){
       .one('webkitAnimationEnd oanimationend msAnimationEnd animationend', function() {
         oldContent.remove();
         newContent.removeClass('enter-left enter-right');
+      })
+      .first().addClass('first');
+
+    setTimeout(function() {
+      newContent.map(function(i, content) {
+        var height = px2num(window.getComputedStyle(content, null).getPropertyValue('height'));
+        if (height > contentHeight) contentHeight = height;
       });
+
+      newContent.css('height', contentHeight + 'px');
+    });
   }
 
   function getTranslateValue(timeline) {

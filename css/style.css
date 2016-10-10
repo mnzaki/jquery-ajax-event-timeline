@@ -43,7 +43,7 @@ Main Components
   position: relative;
   height: 100px;
   width: 90%;
-  max-width: 800px;
+  /*max-width: 800px;*/
   margin: 0 auto;
 }
 .cd-horizontal-timeline .events-wrapper {
@@ -258,7 +258,12 @@ Main Components
   -webkit-animation-timing-function: ease-in-out;
   -moz-animation-timing-function: ease-in-out;
   animation-timing-function: ease-in-out;
+  border-left: 2px solid #dfdfdf;
 }
+.cd-horizontal-timeline .events-content li.first {
+  border: 0;
+}
+
 .cd-horizontal-timeline .events-content li.selected {
   /* visible event content */
   position: relative;
