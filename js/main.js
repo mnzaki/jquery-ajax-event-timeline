@@ -169,7 +169,7 @@ jQuery(document).ready(function($){
 
   function renderContentChange(timelineComponents, timelineTotWidth, newEvent, nextOrPrev) {
     var appendOrPrepend = nextOrPrev == 'next' ? 'append' : 'prepend',
-        oldContent = timelineComponents['eventsContent'].find('.selected'),
+        oldContent = timelineComponents['eventsContent'].find('li'),
         newContent = $(),
         eventLis = newEvent.parent('li');
 
@@ -295,7 +295,8 @@ jQuery(document).ready(function($){
       classLeaving = 'leave-right';
     }
 
-    oldContent.attr('class', classLeaving).map(function(i, content) {
+    oldContent.map(function(i, content) {
+      content.setAttribute('class', classLeaving);
       content.style['margin-left'] = (i*contentWidth)+'%';
     });
 
