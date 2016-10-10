@@ -199,9 +199,10 @@ jQuery(document).ready(function($){
             newLi = $('<li></li>', {
               "class": "loading",
               "data-date": date,
-            });
+            }).append($('<div></div>', { "class": "loader" }));
         getEventContent(date).then(function(data) {
           newLi.html(data);
+          newLi.removeClass('loading');
         });
         newContent = newContent.add(newLi);
       });
