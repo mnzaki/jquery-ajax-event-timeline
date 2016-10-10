@@ -64,8 +64,6 @@ jQuery(document).ready(function($){
     loadEventsList(timelineComponents['eventsWrapper']).then(function() {
       timelineComponents['fillingLine'] = timelineComponents['eventsWrapper'].children('.filling-line');
       timelineComponents['timelineEvents'] = timelineComponents['eventsWrapper'].find('a');
-      timelineComponents['timelineDates'] = parseDate(timelineComponents['timelineEvents']);
-      timelineComponents['eventsMinLapse'] = minLapse(timelineComponents['timelineDates']);
 
       //assign a left postion to the single events along the timeline
       setDatePosition(timelineComponents, config.eventsMinDistance);
@@ -230,8 +228,10 @@ jQuery(document).ready(function($){
 
   function updateFilling(selectedEvent, filling, totWidth) {
     //change .filling-line length according to the selected event
+    filling = filling.get(0);
+
     if (config.panels < 2) {
-      filling[0].style['width'] = 0;
+      filling.style['width'] = 0;
       return;
     }
 
@@ -241,8 +241,8 @@ jQuery(document).ready(function($){
         eventWidth = px2num(eventStyle.getPropertyValue("width")),
         lastEventWidth = px2num(lastEventStyle.getPropertyValue("width")),
         eventLeft = px2num(eventStyle.getPropertyValue("left")) + eventWidth/2,
-        lastEventLeft = px2num(lastEventStyle.getPropertyValue("left")) + lastEventWidth/2,
-    filling = filling.get(0);
+        lastEventLeft = px2num(lastEventStyle.getPropertyValue("left")) + lastEventWidth/2;
+
     filling.style['left'] = eventLeft + 'px';
     filling.style['width'] = (lastEventLeft - eventLeft) + 'px';
     //var scaleValue = (lastEventLeft-eventLeft)/totWidth;
@@ -250,22 +250,16 @@ jQuery(document).ready(function($){
   }
 
   function setDatePosition(timelineComponents, min) {
-    for (i = 0; i < timelineComponents['timelineDates'].length; i++) {
-        var distance = daydiff(timelineComponents['timelineDates'][0], timelineComponents['timelineDates'][i]),
-          distanceNorm = Math.round(distance/timelineComponents['eventsMinLapse']) + 2;
-        //timelineComponents['timelineEvents'].eq(i).css('left', distanceNorm*min+'px');
-        timelineComponents['timelineEvents'].eq(i).css('left', i*min+'px');
-    }
+    timelineComponents['timelineEvents'].map(function(i, event) {
+      event.style['left'] = i*min + 'px';
+    });
   }
 
-  function setTimelineWidth(timelineComponents, width) {
-    var timelineDates = timelineComponents['timelineDates'],
-        timeSpan = daydiff(timelineDates[0], timelineDates[timelineDates.length-1]),
-        timeSpanNorm = timeSpan/timelineComponents['eventsMinLapse'],
-        selectedEvent = timelineComponents['eventsWrapper'].find('a.selected');
-        timeSpanNorm = Math.round(timeSpanNorm) + 4,
-        totalWidth = timeSpanNorm*width;
-    timelineComponents['eventsWrapper'].css('width', totalWidth+'px');
+  function setTimelineWidth(timelineComponents, minDist) {
+    var selectedEvent = timelineComponents['eventsWrapper'].find('a.selected'),
+        totalWidth = minDist * timelineComponents['timelineEvents'].length;
+    timelineComponents['eventsWrapper'].css('width',  totalWidth + 'px');
+
     if (selectedEvent.length) {
       updateFilling(selectedEvent, timelineComponents['fillingLine'], totalWidth);
       updateTimelinePosition('next', selectedEvent, timelineComponents);
@@ -320,45 +314,6 @@ jQuery(document).ready(function($){
     element.style["-ms-transform"] = property+"("+value+")";
     element.style["-o-transform"] = property+"("+value+")";
     element.style["transform"] = property+"("+value+")";
-  }
-
-  //based on http://stackoverflow.com/questions/542938/how-do-i-get-the-number-of-days-between-two-dates-in-javascript
-  function parseDate(events) {
-    var dateArrays = [];
-    events.each(function(){
-      var singleDate = $(this),
-        dateComp = singleDate.data('date');
-      /*
-        dateComp = singleDate.data('date').split('T');
-      if( dateComp.length > 1 ) { //both DD/MM/YEAR and time are provided
-        var dayComp = dateComp[0].split('/'),
-          timeComp = dateComp[1].split(':');
-      } else if( dateComp[0].indexOf(':') >=0 ) { //only time is provide
-        var dayComp = ["2000", "0", "0"],
-          timeComp = dateComp[0].split(':');
-      } else { //only DD/MM/YEAR
-        var dayComp = dateComp[0].split('/'),
-          timeComp = ["0", "0"];
-      }
-      var newDate = new Date(dayComp[2], dayComp[1]-1, dayComp[0], timeComp[0], timeComp[1]);
-      */
-      dateArrays.push(new Date(dateComp));
-    });
-      return dateArrays;
-  }
-
-  function daydiff(first, second) {
-      return Math.abs(Math.round((second-first)));
-  }
-
-  function minLapse(dates) {
-    //determine the minimum distance among events
-    var dateDistances = [];
-    for (i = 1; i < dates.length; i++) {
-        var distance = Math.abs(daydiff(dates[i-1], dates[i]));
-        dateDistances.push(distance);
-    }
-    return Math.min.apply(null, dateDistances);
   }
 
   /*
