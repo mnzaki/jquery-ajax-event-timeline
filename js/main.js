@@ -33,6 +33,7 @@ jQuery(document).ready(function($){
       }).join('');
       eventsWrapper.find('ol').empty().append(newEventsList);
       eventsWrapper.find('time').timeago();
+      $("#apploader").remove();
     });
   }
 
