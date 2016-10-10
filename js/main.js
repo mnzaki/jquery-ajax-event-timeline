@@ -101,7 +101,7 @@ jQuery(document).ready(function($){
 
     timelineComponents['eventsWrapper'].on('click', 'a', function(event) {
       event.preventDefault();
-      showNewContent(timelineComponents, timelineTotWidth, $(this), 'next'); // FIXME nextOrPrev?
+      showNewContent(timelineComponents, timelineTotWidth, $(this));
     });
 
     //on swipe, show next/prev event content
@@ -151,6 +151,12 @@ jQuery(document).ready(function($){
     }
 
     if (!newEvent.length) return;
+
+    if (!nextOrPrev) {
+      var curEvent = timelineComponents['timelineEvents'].filter('.selected').first();
+      nextOrPrev = newEvent.parent('li').index() > curEvent.parent('li').index() ?
+                   'next' : 'prev';
+    }
 
     var appendOrPrepend = nextOrPrev == 'next' ? 'append' : 'prepend',
         oldContent = timelineComponents['eventsContent'].find('.selected'),
