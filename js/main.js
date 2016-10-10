@@ -81,8 +81,13 @@ jQuery(document).ready(function($){
         event.preventDefault();
         var nPanels = parseInt(this.getAttribute('data-panels'));
         if (config.panels == nPanels) return;
+
+        var nextOrPrev = nPanels > config.panels ? 'next' : 'prev';
         config.panels = nPanels;
-        timelineComponents['timelineEvents'].filter('.selected').first().click();
+        renderContentChange(
+          timelineComponents, timelineTotWidth,
+          timelineComponents['timelineEvents'].filter('.selected').first(),
+          nextOrPrev);
         timelineComponents['panelSwitches'].removeClass('selected');
         this.setAttribute('class', 'selected');
       })
@@ -151,13 +156,18 @@ jQuery(document).ready(function($){
     }
 
     if (!newEvent.length) return;
+    var curEvent = timelineComponents['timelineEvents'].filter('.selected').first();
 
     if (!nextOrPrev) {
-      var curEvent = timelineComponents['timelineEvents'].filter('.selected').first();
       nextOrPrev = newEvent.parent('li').index() > curEvent.parent('li').index() ?
                    'next' : 'prev';
     }
+    if (curEvent[0] == newEvent[0]) return;
 
+    renderContentChange(timelineComponents, timelineTotWidth, newEvent, nextOrPrev);
+  }
+
+  function renderContentChange(timelineComponents, timelineTotWidth, newEvent, nextOrPrev) {
     var appendOrPrepend = nextOrPrev == 'next' ? 'append' : 'prepend',
         oldContent = timelineComponents['eventsContent'].find('.selected'),
         newContent = $(),
@@ -285,16 +295,17 @@ jQuery(document).ready(function($){
       classLeaving = 'leave-right';
     }
 
-    oldContent.attr('class', classLeaving).one('webkitAnimationEnd oanimationend msAnimationEnd animationend', function(){
-      oldContent.remove();
-      newContent.removeClass('enter-left enter-right');
-    }).map(function(i, content) {
+    oldContent.attr('class', classLeaving).map(function(i, content) {
       content.style['margin-left'] = (i*contentWidth)+'%';
     });
 
     newContent
+      .css('width', contentWidth + '%')
       .addClass(classEntering)
-      .css('width', contentWidth + '%');
+      .one('webkitAnimationEnd oanimationend msAnimationEnd animationend', function() {
+        oldContent.remove();
+        newContent.removeClass('enter-left enter-right');
+      });
   }
 
   function getTranslateValue(timeline) {
