@@ -24,6 +24,32 @@ jQuery(document).ready(function($){
     return Number(val.replace('px', ''));
   }
 
+  function loadEventsList(eventsWrapper) {
+    return $.getJSON(config.eventsListUrl).then(function (eventsList) {
+      var newEventsList = eventsList.map(function(date) {
+        var formattedDate = formatDate(new Date(date));
+        return '<li><a href="#0" data-date="'+date+'">' + formattedDate + '</a></li>';
+      }).join('');
+      eventsWrapper.find('ol').empty().append(newEventsList);
+    });
+  }
+
+  var eventContent = {};
+
+  function getEventContent(date) {
+    if (eventContent[date]) return eventContent[date];
+    return eventContent[date] = $.get(config.eventContentUrl, {date: date});
+  }
+
+  function abortEventContentRequest(date) {
+    // if event is still loading, abort and delete it
+    var req = eventContent[date];
+    if (req && req.readyState != 4) {
+      req.abort();
+      delete eventContent[date];
+    }
+  }
+
   $('.cd-horizontal-timeline').each(function(){
     var timeline = $(this),
         timelineTotWidth,
@@ -99,22 +125,6 @@ jQuery(document).ready(function($){
     });
   });
 
-  function loadEventsList(eventsWrapper) {
-    return $.getJSON(config.eventsListUrl).then(function (eventsList) {
-      var newEventsList = eventsList.map(function(date) {
-        var formattedDate = formatDate(new Date(date));
-        return '<li><a href="#0" data-date="'+date+'">' + formattedDate + '</a></li>';
-      }).join('');
-      eventsWrapper.find('ol').empty().append(newEventsList);
-    });
-  }
-
-  var eventContent = {};
-  function getEventContent(date) {
-    if (eventContent[date]) return eventContent[date];
-    return eventContent[date] = $.get(config.eventContentUrl, {date: date});
-  }
-
   function updateSlide(timelineComponents, timelineTotWidth, string) {
     //retrieve translateX value of timelineComponents['eventsWrapper']
     var translateValue = getTranslateValue(timelineComponents['eventsWrapper']),
@@ -165,7 +175,7 @@ jQuery(document).ready(function($){
 
     oldContent.map(function(i, li) {
       var date = li.getAttribute('data-date');
-      getEventContent(date).abort();
+      abortEventContentRequest(date);
     });
     timelineComponents['eventsContent'].find('ol')[appendOrPrepend](newContent);
     updateVisibleContent(oldContent, newContent, nextOrPrev);
