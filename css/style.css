@@ -492,6 +492,10 @@ Main Components
   margin-top: 100px;
 }
 
+#appLoader {
+  overflow: hidden;
+}
+
 .loader {
   margin: 60px auto;
   font-size: 10px;
@@ -534,7 +538,8 @@ Main Components
   }
 }
 
-.cd-horizontal-timeline #failedToLoad {
+#failedToLoad {
   text-align: center;
   margin: 60px 0;
   line-height: 45px;
+}

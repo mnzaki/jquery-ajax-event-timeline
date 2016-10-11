@@ -24,7 +24,9 @@ jQuery(document).ready(function($){
     return Number(val.replace('px', ''));
   }
 
-  function loadEventsList(eventsWrapper) {
+  function loadEventsList(timelineComponents) {
+    var eventsWrapper = timelineComponents['eventsWrapper'],
+        appLoader     = timelineComponents['appLoader'];
     return $.getJSON(config.eventsListUrl).then(function (eventsList) {
       var newEventsList = eventsList.map(function(date) {
         var formattedDate = formatDate(new Date(date));
@@ -33,7 +35,7 @@ jQuery(document).ready(function($){
       }).join('');
       eventsWrapper.find('ol').empty().append(newEventsList);
       eventsWrapper.find('time').timeago();
-      $("#apploader").remove();
+      appLoader.remove();
     });
   }
 
@@ -67,20 +69,34 @@ jQuery(document).ready(function($){
     timelineComponents['eventsWrapper'] = timelineComponents['timelineWrapper'].children('.events');
     timelineComponents['eventsContent'] = timeline.children('.events-content');
     timelineComponents['panelSwitches'] = timeline.find('.panel-switch a');
+    timelineComponents['appLoader'] = timeline.find('#appLoader').remove().prependTo('body');
     timelineComponents['failedToLoad'] = timeline.find('#failedToLoad').remove();
 
-    loadEventsList(timelineComponents['eventsWrapper']).then(function() {
-      timelineComponents['fillingLine'] = timelineComponents['eventsWrapper'].children('.filling-line');
-      timelineComponents['timelineEvents'] = timelineComponents['eventsWrapper'].find('a');
+    function tryToLoadEvents() {
+      loadEventsList(timelineComponents).then(function() {
+        timelineComponents['fillingLine'] = timelineComponents['eventsWrapper'].children('.filling-line');
+        timelineComponents['timelineEvents'] = timelineComponents['eventsWrapper'].find('a');
 
-      //assign a left postion to the single events along the timeline
-      setDatePosition(timelineComponents, config.eventsMinDistance);
-      //assign a width to the timeline
-      timelineTotWidth = setTimelineWidth(timelineComponents, config.eventsMinDistance);
-      //the timeline has been initialize - show it
-      timeline.addClass('loaded');
+        //assign a left postion to the single events along the timeline
+        setDatePosition(timelineComponents, config.eventsMinDistance);
+        //assign a width to the timeline
+        timelineTotWidth = setTimelineWidth(timelineComponents, config.eventsMinDistance);
+        //the timeline has been initialize - show it
+        timeline.addClass('loaded');
 
-      timelineComponents['timelineEvents'].first().click();
+        timelineComponents['timelineEvents'].first().click();
+      }).fail(function() {
+        timelineComponents['appLoader'].append(timelineComponents['failedToLoad'].clone());
+      });
+    }
+
+    tryToLoadEvents();
+
+    // event loading failure refresh click handler
+    timelineComponents['appLoader'].on('click', 'a.refresh', function (event) {
+      event.preventDefault();
+      $(this).parent('#failedToLoad').remove();
+      tryToLoadEvents();
     });
 
     // panel switches

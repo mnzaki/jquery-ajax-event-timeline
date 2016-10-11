@@ -13,8 +13,19 @@
   <title>Horizontal Timeline | CodyHouse</title>
 </head>
 <body>
-<div id="apploader" class="loader">Loading...</div>
+
 <section class="cd-horizontal-timeline">
+  <div id="appLoader">
+    <div class="loader">Loading...</div>
+  </div>
+
+  <div id="failedToLoad">
+    <a href="#" class="refresh">
+      <h2>Loading failed</h2>
+      Click to refresh
+    </a>
+  </div>
+
   <div class="panel-switch">
     <a href="#" title="1 column display" class="one" data-panels="1"><div class="menu-burger"></div></a>
     <a href="#" title="2 column display" class="two" data-panels="2"><div class="menu-burger"></div><div class="menu-burger"></div></a>
@@ -36,13 +47,6 @@
       <li><a href="#0" class="next item">Next</a></li>
       <li><a href="#0" class="next scroll">Next</a></li>
     </ul> <!-- .cd-timeline-navigation -->
-
-    <div id="failedToLoad">
-      <a href="#" class="refresh">
-        <h2>Loading failed</h2>
-        Click to refresh
-      </a>
-    </div>
   </div> <!-- .timeline -->
 
   <div class="events-content">
