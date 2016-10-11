@@ -48,10 +48,10 @@ jQuery(document).ready(function($){
     });
   }
 
-  function abortEventContentRequest(date) {
+  function abortEventContentRequest(date, force) {
     // if event is still loading, abort and delete it
     var req = eventContent[date];
-    if (req && req.readyState != 4) {
+    if (req && (force || req.readyState != 4)) {
       req.abort();
       delete eventContent[date];
     }
@@ -67,6 +67,7 @@ jQuery(document).ready(function($){
     timelineComponents['eventsWrapper'] = timelineComponents['timelineWrapper'].children('.events');
     timelineComponents['eventsContent'] = timeline.children('.events-content');
     timelineComponents['panelSwitches'] = timeline.find('.panel-switch a');
+    timelineComponents['failedToLoad'] = timeline.find('#failedToLoad').remove();
 
     loadEventsList(timelineComponents['eventsWrapper']).then(function() {
       timelineComponents['fillingLine'] = timelineComponents['eventsWrapper'].children('.filling-line');
@@ -90,20 +91,13 @@ jQuery(document).ready(function($){
         if (config.panels == nPanels) return;
 
         var $this = $(this),
-            curEvent = timelineComponents['timelineEvents'].filter('.selected').first(),
+            curEvent = getCurrentEvent(timelineComponents),
             nextOrPrev = nPanels > config.panels ? 'next' : 'prev';
         config.panels = nPanels;
 
-        showNewContent(timelineComponents, timelineTotWidth, curEvent);
-        newCurEvent = timelineComponents['timelineEvents'].filter('.selected').first();
-        if (newCurEvent[0] == curEvent[0]) {
-            renderContentChange(
-            timelineComponents, timelineTotWidth,
-            curEvent,
-            nextOrPrev);
-          timelineComponents['panelSwitches'].removeClass('selected');
-          $this.addClass('selected');
-        }
+        showNewContent(timelineComponents, timelineTotWidth, curEvent, null, true);
+        timelineComponents['panelSwitches'].removeClass('selected');
+        $this.addClass('selected');
       })
       .filter('[data-panels="'+config.panels+'"]').addClass('selected');
 
@@ -126,7 +120,6 @@ jQuery(document).ready(function($){
         goToAdjacentEvent(timelineComponents, timelineTotWidth, 'prev');
       });
 
-
     timelineComponents['eventsWrapper'].on('click', 'a', function(event) {
       event.preventDefault();
       showNewContent(timelineComponents, timelineTotWidth, $(this));
@@ -139,6 +132,11 @@ jQuery(document).ready(function($){
       })
       .on('swiperight', function() {
         goToAdjacentEvent(timelineComponents, timelineTotWidth, 'prev');
+      })
+      .on('click', 'a.refresh', function(event) {
+        event.preventDefault();
+        var curEvent = getCurrentEvent(timelineComponents);
+        showNewContent(timelineComponents, timelineTotWidth, curEvent, null, true);
       });
 
     //keyboard navigation
@@ -150,6 +148,10 @@ jQuery(document).ready(function($){
       }
     });
   });
+
+  function getCurrentEvent(timelineComponents) {
+    return timelineComponents['timelineEvents'].filter('.selected').first();
+  }
 
   function updateSlide(timelineComponents, timelineTotWidth, string) {
     //retrieve translateX value of timelineComponents['eventsWrapper']
@@ -171,7 +173,7 @@ jQuery(document).ready(function($){
     updateTimelinePosition(nextOrPrev, newEvent, timelineComponents);
   }
 
-  function showNewContent(timelineComponents, timelineTotWidth, newEvent, nextOrPrev) {
+  function showNewContent(timelineComponents, timelineTotWidth, newEvent, nextOrPrev, forceRerender) {
     // handle clicking on an event that doesn't have enough events ahead of it
     if (config.panels > 1) {
       var lastEventLi = newEvent.parent('li').nextAll('li:lt('+(config.panels-1)+')').last();
@@ -180,13 +182,13 @@ jQuery(document).ready(function($){
     }
 
     if (!newEvent.length) return;
-    var curEvent = timelineComponents['timelineEvents'].filter('.selected').first();
+    var curEvent = getCurrentEvent(timelineComponents);
 
     if (!nextOrPrev) {
       nextOrPrev = newEvent.parent('li').index() > curEvent.parent('li').index() ?
                    'next' : 'prev';
     }
-    if (curEvent[0] == newEvent[0]) return;
+    if (!forceRerender && curEvent[0] == newEvent[0]) return;
 
     renderContentChange(timelineComponents, timelineTotWidth, newEvent, nextOrPrev);
   }
@@ -205,10 +207,17 @@ jQuery(document).ready(function($){
               "class": "loading",
               "data-date": date,
             }).append($('<div></div>', { "class": "loader" }));
+
+        newContent = newContent.add(newLi);
+
         getEventContent(date).then(function(data) {
           newLi.html(data);
+        }).fail(function () {
+          newLi.attr('data-date', null);
+          newLi.html(timelineComponents['failedToLoad'].clone());
+          abortEventContentRequest(date, true);
+        }).always(function() {
           newLi.removeClass('loading');
-
           setTimeout(function() {
               var height = px2num(window.getComputedStyle(newLi[0], null).getPropertyValue('height'));
             timelineComponents['eventsContent'].find('selected').map(function(i, content) {
@@ -217,7 +226,6 @@ jQuery(document).ready(function($){
             });
           });
         });
-        newContent = newContent.add(newLi);
       });
 
     oldContent.map(function(i, li) {
@@ -312,7 +320,7 @@ jQuery(document).ready(function($){
   }
 
   function setTimelineWidth(timelineComponents, minDist) {
-    var selectedEvent = timelineComponents['eventsWrapper'].find('a.selected'),
+    var selectedEvent = getCurrentEvent(timelineComponents),
         totalWidth = minDist * timelineComponents['timelineEvents'].length;
     timelineComponents['eventsWrapper'].css('width',  totalWidth + 'px');
 

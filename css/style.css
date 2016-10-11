@@ -533,3 +533,8 @@ Main Components
     transform: rotate(360deg);
   }
 }
+
+.cd-horizontal-timeline #failedToLoad {
+  text-align: center;
+  margin: 60px 0;
+  line-height: 45px;
