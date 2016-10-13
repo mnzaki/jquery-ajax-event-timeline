@@ -14,49 +14,14 @@
 </head>
 <body>
 
-<section class="cd-horizontal-timeline">
-  <div id="appLoader">
-    <div class="loader">Loading...</div>
-  </div>
-
-  <div id="failedToLoad">
-    <a href="#" class="refresh">
-      <h2>Loading failed</h2>
-      Click to refresh
-    </a>
-  </div>
-
-  <div class="panel-switch">
-    <a href="#" title="1 column display" class="one" data-panels="1"><div class="menu-burger"></div></a>
-    <a href="#" title="2 column display" class="two" data-panels="2"><div class="menu-burger"></div><div class="menu-burger"></div></a>
-  </div>
-
-  <div class="timeline">
-    <div class="events-wrapper">
-      <div class="events">
-        <ol>
-        </ol>
-
-        <span class="filling-line" aria-hidden="true"></span>
-      </div> <!-- .events -->
-    </div> <!-- .events-wrapper -->
-
-    <ul class="cd-timeline-navigation">
-      <li><a href="#0" class="prev scroll inactive">Prev</a></li>
-      <li><a href="#0" class="prev item inactive">Prev</a></li>
-      <li><a href="#0" class="next item">Next</a></li>
-      <li><a href="#0" class="next scroll">Next</a></li>
-    </ul> <!-- .cd-timeline-navigation -->
-  </div> <!-- .timeline -->
-
-  <div class="events-content">
-    <ol></ol>
-  </div> <!-- .events-content -->
-</section>
+<section id="timeline1"></section>
 
 <script src="js/jquery-2.1.4.js"></script>
 <script src="js/jquery.detect_swipe.min.js"></script>
 <script src="js/jquery.timeago.min.js"></script>
-<script src="js/main.js"></script>
+<script src="js/jquery.event_timeline.js"></script>
+<script type="text/javascript">
+  $(function() { $('#timeline1').eventTimeline(); });
+</script>
 </body>
 </html>
