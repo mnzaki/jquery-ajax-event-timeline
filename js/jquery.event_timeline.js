@@ -57,7 +57,7 @@ $.fn.eventTimeline = (function () {
 
   function EventTimeline($elem, config) {
     var self = this;
-    self.config = $.extend(config, defaults, config);
+    self.config = $.extend({}, defaults, config);
     self.eventContent = {};
     self.elems = {
       timeline: $elem.find('.cd-horizontal-timeline'),
