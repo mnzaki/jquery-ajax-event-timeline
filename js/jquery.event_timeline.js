@@ -495,7 +495,7 @@ $.fn.eventTimeline = (function () {
       </div>'
     );
 
-    timelines[this[0]] = timelines[this[0]] || new EventTimeline(this, config);
+    new EventTimeline(this, config);
     return this;
   }
 })();
