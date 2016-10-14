@@ -346,7 +346,7 @@ $.fn.eventTimeline = (function () {
           totWidth = wrapperWidth - this.timelineWidth,
           timelineTranslate = this.getTranslateValue();
 
-      if (lastVisible.length) {
+      if (nextOrPrev == 'next' && lastVisible.length) {
         var lastEventStyle = window.getComputedStyle(lastVisible.get(0), null),
             lastEventLeft = px2num(lastEventStyle.getPropertyValue("left")) + halfDist;
 
@@ -355,7 +355,7 @@ $.fn.eventTimeline = (function () {
         }
       }
 
-      if (firstVisible.length) {
+      if (nextOrPrev == 'prev' && firstVisible.length) {
         var firstEventStyle = window.getComputedStyle(firstVisible.get(0), null),
             firstEventLeft = px2num(firstEventStyle.getPropertyValue("left")) + halfDist;
         if (firstEventLeft - halfDist < - timelineTranslate) {
