@@ -500,7 +500,7 @@ $.fn.eventTimeline = (function () {
       </div>'
     );
 
-    new EventTimeline(this, config);
+    this.data('eventTimeline', new EventTimeline(this, config));
     return this;
   }
 })();
