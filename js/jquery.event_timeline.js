@@ -50,6 +50,7 @@ $.fn.eventTimeline = (function () {
 
   var defaults = {
     panels: 2,
+    panelSwitches: true,
     eventsMinDistance: 120,
     eventsListUrl: 'http://sp.nx.sg/hs/dates.php',
     eventContentUrl: 'http://sp.nx.sg/hs/panels.php'
@@ -70,6 +71,9 @@ $.fn.eventTimeline = (function () {
       loadingFailed: $elem.find('.loading-failed').remove(),
     };
 
+    if (!self.config.panelSwitches) {
+      $elem.find('.panel-switch').remove();
+    }
     self.tryToLoadEvents();
 
     // event loading failure refresh click handler
@@ -83,17 +87,7 @@ $.fn.eventTimeline = (function () {
     self.elems.panelSwitches
       .click(function(event) {
         event.preventDefault();
-        var nPanels = parseInt(this.getAttribute('data-panels'));
-        if (self.config.panels == nPanels) return;
-
-        var $this = $(this),
-            curEvent = self.getCurrentEvent(),
-            nextOrPrev = nPanels > self.config.panels ? 'next' : 'prev';
-        self.config.panels = nPanels;
-
-        self.showNewContent(curEvent, null, true);
-        self.elems.panelSwitches.removeClass('selected');
-        $this.addClass('selected');
+        self.setPanels(parseInt(this.getAttribute('data-panels')));
       })
       .filter('[data-panels="'+self.config.panels+'"]').addClass('selected');
 
@@ -452,7 +446,18 @@ $.fn.eventTimeline = (function () {
           newContent.removeClass('enter-left enter-right');
         })
         .first().addClass('first');
-    }
+    },
+
+    setPanels: function(nPanels) {
+      if (this.config.panels == nPanels) return;
+
+      var curEvent = this.getCurrentEvent(),
+          nextOrPrev = nPanels > this.config.panels ? 'next' : 'prev';
+      this.config.panels = nPanels;
+      this.showNewContent(curEvent, nextOrPrev, true);
+      this.elems.panelSwitches.removeClass('selected');
+      this.elems.panelSwitches.filter('[data-panels="'+nPanels+'"]').addClass('selected');
+    },
   });
 
   return function(config) {
