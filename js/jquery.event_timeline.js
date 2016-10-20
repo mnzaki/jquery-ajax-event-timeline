@@ -52,8 +52,8 @@ $.fn.eventTimeline = (function () {
     panels: 2,
     panelSwitches: true,
     eventsMinDistance: 120,
-    eventsListUrl: 'http://sp.nx.sg/hs/dates.php',
-    eventContentUrl: 'http://sp.nx.sg/hs/panels.php'
+    eventsListUrl: '/dates.php',
+    eventContentUrl: '/panels.php'
   }, timelines = {};
 
   function EventTimeline($elem, config) {
@@ -457,6 +457,7 @@ $.fn.eventTimeline = (function () {
       this.showNewContent(curEvent, nextOrPrev, true);
       this.elems.panelSwitches.removeClass('selected');
       this.elems.panelSwitches.filter('[data-panels="'+nPanels+'"]').addClass('selected');
+      return this;
     },
   });
 
