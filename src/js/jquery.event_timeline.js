@@ -299,7 +299,9 @@ $.fn.eventTimeline = (function () {
 
       oldContent.map(function(i, li) {
         var date = li.getAttribute('data-date');
-        self.abortEventContentRequest(date);
+        // if this item is in the newContent as well, don't cancel
+        if (!newContent.filter('li[data-date="'+date+'"]').length)
+          self.abortEventContentRequest(date);
       });
 
       self.elems.eventsContent.find('ol')[appendOrPrepend](newContent);
