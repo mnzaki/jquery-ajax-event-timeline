@@ -1,4 +1,4 @@
-@import 'bourbon'; // http://bourbon.io/
+@import './bourbon/bourbon'; // http://bourbon.io/
 
 @import '../partials/variables'; // colors, fonts etc...
 
@@ -115,7 +115,7 @@ Main Components
 
   .events a {
     position: absolute;
-    width: 100%;
+    width: 100px;
     bottom: 0;
     opacity: 0.6;
     line-height: 125%;
@@ -168,7 +168,7 @@ Main Components
   }
 }
 
-.cd-timeline-navigation .panel-switch {
+.cd-horizontal-timeline .panel-switch {
   display: block;
   width: 100px;
   padding: 5px;
