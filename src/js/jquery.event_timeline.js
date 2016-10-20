@@ -52,8 +52,30 @@ $.fn.eventTimeline = (function () {
     panels: 2,
     panelSwitches: true,
     eventsMinDistance: 120,
-    eventsListUrl: '/dates.php',
-    eventContentUrl: '/panels.php'
+
+    // if this URL is provided, the plugin will try to load the list of
+    // events from here, as a JSON array of datetimes in ISO format
+    // similar to new Date().toISOString() output
+    eventsListUrl: '',
+    // if this URL is provided, the plugin will try to load panel contents
+    // from it passing the ISO date as a query parameter
+    // ex: { eventContentUrl: '/panels.php' }
+    // request: /panels.php?date=2016-10-08T09%3A31%3A28%2B00%3A00
+    eventContentUrl: '',
+
+    // if an object is provided, it is used to retrieve panel content
+    // keyed by ISO formatted dates.
+    // ex { eventData: {'2016-10-08T09:31:28+00:00': '<p>event html content</p>' }
+    eventData: null,
+
+    // if a function is provided, this function should call callback
+    // with a list of ISO formatted dates
+    // similar to 'new Date().toISOString()'
+    getEventsList: function(callback) { callback([]) },
+
+    // if a function is provided, it should take an ISO date string as a parameter
+    // and call callback with the html contents of the panel
+    getEventContent: function(isoDate, callback) { callback('') }
   }, timelines = {};
 
   function EventTimeline($elem, config) {
@@ -74,7 +96,6 @@ $.fn.eventTimeline = (function () {
     if (!self.config.panelSwitches) {
       $elem.find('.panel-switch').remove();
     }
-    self.tryToLoadEvents();
 
     // event loading failure refresh click handler
     self.elems.appLoader.on('click', 'a.refresh', function (event) {
@@ -137,6 +158,8 @@ $.fn.eventTimeline = (function () {
         self.goToAdjacentEvent('next');
       }
     });
+
+    self.tryToLoadEvents();
   }
 
   $.extend(EventTimeline.prototype, {
@@ -160,9 +183,19 @@ $.fn.eventTimeline = (function () {
 
     loadEventsList: function () {
       var eventsWrapper = this.elems.eventsWrapper,
-          appLoader     = this.elems.appLoader;
+          appLoader     = this.elems.appLoader,
+          promise;
 
-      return $.getJSON(this.config.eventsListUrl).then(function (eventsList) {
+      if (this.config.eventsListUrl) {
+        promise = $.getJSON(this.config.eventsListUrl);
+      } else if (this.config.eventData) {
+        promise = $.Deferred().resolve(Object.keys(this.config.eventData));
+      } else if (this.config.getEventsList) {
+        promise = $.Deferred();
+        this.config.getEventsList(promise.resolve);
+      }
+
+      return promise.then(function (eventsList) {
         var newEventsList = eventsList.map(function(date) {
           var formattedDate = formatDate(new Date(date));
           return '<li><a href="#0" data-date="'+date+'">' + formattedDate +
@@ -176,11 +209,19 @@ $.fn.eventTimeline = (function () {
 
     getEventContent: function (date) {
       if (this.eventContent[date]) return this.eventContent[date];
-      return this.eventContent[date] = $.ajax({
-        url: this.config.eventContentUrl,
-        data: {date: date},
-        dataType: 'html'
-      });
+      if (this.config.eventContentUrl) {
+        return this.eventContent[date] = $.ajax({
+          url: this.config.eventContentUrl,
+          data: {date: date},
+          dataType: 'html'
+        });
+      } else if (this.config.eventData) {
+        return $.Deferred().resolve(this.config.eventData[date]);
+      } else if (this.config.getEventContent) {
+        var promise = $.Deferred();
+        this.config.getEventContent(date, promise.resolve);
+        return promise;
+      }
     },
 
     abortEventContentRequest: function(date, force) {

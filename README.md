@@ -52,7 +52,7 @@ var eventTimelineConfig = {
   getEventContent: function(isoDate, callback) { callback('') }
 };
 
-$("#eventTimeline1').eventTimeline(eventTimelineConfig);
+$("#eventTimeline1").eventTimeline(eventTimelineConfig);
 
 // the plugin is exported on element data
 $("#eventTimeline1").data("eventTimeline")
